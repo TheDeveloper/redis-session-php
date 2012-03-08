@@ -1,19 +1,48 @@
 ### Redis-backed PHP session handler
-Stores your $_SESSION in Redis, json encoded. Dependency: [predis](https://github.com/nrk/predis)
+Stores your $_SESSION in Redis, JSON encoded. Dependency: [predis](https://github.com/nrk/predis) (included as submodule)
 
-I wanted to be able to have sessions that were ubiquitous across apps running on different platforms. My intended use case was to have sessions shared between a PHP and Node.js app.
+### Installation
+Clone:
 
-PHP session data is serialized using json_encode by default, because PHP uses a criminally indescipherable format by default (apparently only session_decode() can read it). I don't have time to go digging through PHP source and writing my own adapter. See below for rant.
+````
+git clone https://TheDeveloper@github.com/TheDeveloper/redis-session-php.git
+````
+Or include as a submodule:
+
+    git submodule add https://TheDeveloper@github.com/TheDeveloper/redis-session-php.git
+    
+### Usage
+````
+require('redis-session-php/redis-session.php');
+RedisSession::start(); // overrides PHP's default session_save_handler and calls session_start()
+
+// use sessions as normal
+$_SESSION['barbara'] = 'streisand';
+````
+    
+### Synopsis
+
+I wanted to be able to have sessions that were transferable across apps running on different platforms. My intended use case was to have sessions shared between a PHP and Node.js app. Therefore, a Redis datastore acts as a shared store for the session data.
+
+This module serializes your $_SESSION data using json_encode by default, because PHP natively uses a criminally indescipherable format (apparently only session_decode() can read it). I don't have time to go digging through PHP source and writing my own adapter. See below for rant.
 
 **Warning: encoding to JSON gives no bidirectional support for 2+D PHP arrays and objects**
 
 If a PHP array has more than one dimension (i.e. key => value nesting), json_encode converts it to an JSON object.
 
-You can only ever have just arrays or just objects for these data structures in the decoded response. To switch between the two, use the 2nd (bool) parameter in json_decode.
+Because of this, you can only ever have just arrays or just objects (aside from strings & integers) in your $_SESSION. This module returns arrays by default. To switch between the two, use the 2nd (bool) parameter in json_decode. For only arrays:
 
-    json_decode(json_encode($_SESSION), true);
+    $_SESSION = json_decode(json_encode($_SESSION), true);
+For only objects:
+
+    $_SESSION = json_decode(json_encode($_SESSION));
     
-We use objects by default.
+If you don't need to serialize in a universal format like JSON, and/or you only wish to use Redis as a session datastore, you can instead use PHP's native seralize() and unserialize(), which will preserve any data structure. Before you call RedisSession::start(), you define which functions to use like so:
+
+````
+define('REDIS_SESSION_SERIALIZER', 'serialize');
+define('REDIS_SESSION_UNSERIALIZER, 'unserialize');
+````
     
 ### Testing
 Requires PHP unit. We need to run a fairly funky command to get around PHP complaining about header output when it tries to start the session:
