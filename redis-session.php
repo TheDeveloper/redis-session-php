@@ -1,5 +1,8 @@
 <?php
 
+function json_decode_array($d){
+  return json_decode($d, true);
+}
 //class RedisSession implements SessionHandlerInterface{ // only PHP 5.4.0+
 class RedisSession{
   private $serializer;
@@ -12,7 +15,7 @@ class RedisSession{
     if(!defined('REDIS_SESSION_SERIALIZER'))
       define('REDIS_SESSION_SERIALIZER', 'json_encode');
     if(!defined('REDIS_SESSION_UNSERIALIZER'))
-      define('REDIS_SESSION_UNSERIALIZER', 'json_decode');
+      define('REDIS_SESSION_UNSERIALIZER', 'json_decode_array');
     $obj = new self($redis_conf, $unpackItems);
     session_set_save_handler(
       array($obj, "open"),
@@ -27,7 +30,7 @@ class RedisSession{
 
   function __construct($redis_conf, $unpackItems){
     $this->serializer = function_exists(REDIS_SESSION_SERIALIZER) ? REDIS_SESSION_SERIALIZER : 'json_encode';
-    $this->unserializer = function_exists(REDIS_SESSION_UNSERIALIZER) ? REDIS_SESSION_UNSERIALIZER : 'json_decode';
+    $this->unserializer = function_exists(REDIS_SESSION_UNSERIALIZER) ? REDIS_SESSION_UNSERIALIZER : 'json_decode_array';
     $this->unpackItems = $unpackItems;
 
     $this->redis = new \Predis\Client($redis_conf);
@@ -42,7 +45,10 @@ class RedisSession{
   }
 
   function read($id) {
-    return $this->unserializer($this->redis->get(REDIS_SESSION_PREFIX . $id));
+    $d = $this->unserializer($this->redis->get(REDIS_SESSION_PREFIX . $id));
+    // Revive $_SESSION from our array
+    $_SESSION = $d;
+    return session_encode(); // Return in native PHP session encoded format
   }
 
 
