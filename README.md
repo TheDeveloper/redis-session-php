@@ -51,7 +51,7 @@ Check out http://petermoulding.com/php_sessions_and_serialisation for more info 
 
 I also found this http://www.drupalcoder.com/blog/decoding-raw-php-session-values which only sorta works.
 
-## 4 LICENSE
+## LICENSE
 
 (The MIT license)
 
