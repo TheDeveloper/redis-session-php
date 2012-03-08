@@ -9,9 +9,11 @@ PHP session data is serialized using json_encode by default, because PHP uses a 
 
 If a PHP array has more than one dimension (i.e. key => value nesting), json_encode converts it to an JSON object.
 
-You can only ever have just arrays or just objects for these data structures in the decoded response. To switch between the two, use the 2nd (bool) parameter in json_decode
+You can only ever have just arrays or just objects for these data structures in the decoded response. To switch between the two, use the 2nd (bool) parameter in json_decode.
 
     json_decode(json_encode($_SESSION), true);
+    
+We use objects by default.
     
 ### Testing
 Requires PHP unit. We need to run a fairly funky command to get around PHP complaining about header output when it tries to start the session:
