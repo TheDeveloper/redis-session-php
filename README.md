@@ -1,5 +1,5 @@
 ### Redis-backed PHP session handler
-Stores your $_SESSION in Redis, JSON encoded. Dependency: [predis](https://github.com/nrk/predis) (included as submodule)
+Stores your $_SESSION in Redis, using encoding of your choice. Dependency: [predis](https://github.com/nrk/predis) (included as submodule)
 
 ### Installation
 Clone:
