@@ -1,7 +1,6 @@
 <?php
 //ini_set('session.serialize_handler', 'wddx');
-require_once(__DIR__.'/../modules/predis/lib/Predis/Autoloader.php');
-Predis\Autoloader::register();
+
 require_once(__DIR__.'/../redis-session.php');
 
 $redis = new Predis\Client();
