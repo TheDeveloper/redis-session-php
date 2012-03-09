@@ -1,5 +1,5 @@
 <?php
-if(!class_exists('\Predis\Client', false)){
+if(!class_exists('\Predis\Client')){
   require_once('modules/predis/lib/Predis/Autoloader.php');
   Predis\Autoloader::register();
 }
