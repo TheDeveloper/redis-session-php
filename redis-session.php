@@ -52,7 +52,6 @@ class RedisSession{
     $d = $this->unserializer($this->redis->get(REDIS_SESSION_PREFIX . $id));
     // Revive $_SESSION from our array
     $_SESSION = $d;
-    return session_encode(); // Return in native PHP session encoded format
   }
 
 
