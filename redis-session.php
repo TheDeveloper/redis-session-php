@@ -9,7 +9,9 @@ function json_decode_array($d){
 }
 
 function redis_session_id_mutator($id){
-  return substr($id, 2, strrpos($id, '.'));
+  $o = strrpos($id, '.');
+  if($o >= 2) $o -= 2;
+  return substr($id, 2, $o);
 }
 
 //class RedisSession implements SessionHandlerInterface{ // only PHP 5.4.0+
