@@ -64,7 +64,7 @@ class RedisSession{
   }
 
   function read($id) {
-    $d = $this->unserializer($this->redis->get(REDIS_SESSION_PREFIX . $id));
+    $d = $this->unserializer($this->redis->get(REDIS_SESSION_PREFIX . $this->id_mutator($id)));
     // Revive $_SESSION from our array
     $_SESSION = $d;
   }
@@ -115,7 +115,7 @@ class RedisSession{
 
 
   function destroy($id) {
-    $this->redis->del(REDIS_SESSION_PREFIX . $id);
+    $this->redis->del(REDIS_SESSION_PREFIX . $this->id_mutator($id));
 
     //$unpacked = $this->redis->keys(REDIS_SESSION_PREFIX . $id . ":*");
 
