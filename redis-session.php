@@ -7,11 +7,17 @@ if(!class_exists('\Predis\Client')){
 function json_decode_array($d){
   return json_decode($d, true);
 }
+
+function redis_session_id_mutator($id){
+  return substr($id, 2, strrpos($id, '.'));
+}
+
 //class RedisSession implements SessionHandlerInterface{ // only PHP 5.4.0+
 class RedisSession{
   private $serializer;
   private $unserializer;
   private $unpackItems;
+  private $id_mutator;
 
   static function start($redis_conf = array(), $unpackItems = array()){
     if(!defined('REDIS_SESSION_PREFIX'))
@@ -20,6 +26,8 @@ class RedisSession{
       define('REDIS_SESSION_SERIALIZER', 'json_encode');
     if(!defined('REDIS_SESSION_UNSERIALIZER'))
       define('REDIS_SESSION_UNSERIALIZER', 'json_decode_array');
+    if(!defined('REDIS_SESSION_ID_MUTATOR'))
+      define('REDIS_SESSION_ID_MUTATOR', 'redis_session_id_mutator');
     $obj = new self($redis_conf, $unpackItems);
     session_set_save_handler(
       array($obj, "open"),
@@ -35,6 +43,7 @@ class RedisSession{
   function __construct($redis_conf, $unpackItems){
     $this->serializer = function_exists(REDIS_SESSION_SERIALIZER) ? REDIS_SESSION_SERIALIZER : 'json_encode';
     $this->unserializer = function_exists(REDIS_SESSION_UNSERIALIZER) ? REDIS_SESSION_UNSERIALIZER : 'json_decode_array';
+    $this->id_mutator = function_exists(REDIS_SESSION_ID_MUTATOR) ? REDIS_SESSION_ID_MUTATOR : 'redis_session_id_mutator';
     $this->unpackItems = $unpackItems;
 
     $this->redis = new \Predis\Client($redis_conf);
@@ -46,6 +55,10 @@ class RedisSession{
 
   function unserializer(){
     return call_user_func_array($this->unserializer, func_get_args());
+  }
+
+  function id_mutator(){
+    return call_user_func_array($this->id_mutator, func_get_args());
   }
 
   function read($id) {
@@ -79,9 +92,10 @@ class RedisSession{
     $ttl = ini_get("session.gc_maxlifetime");
     $unpackItems = $this->unpackItems;
     $serializer = $this->serializer;
+    $id_mutator = $this->id_mutator;
 
-    $this->redis->pipeline(function ($r) use (&$id, &$data, &$ttl, &$unpackItems, &$serializer) {
-      $r->setex(REDIS_SESSION_PREFIX . $id, $ttl, $serializer($data));
+    $this->redis->pipeline(function ($r) use (&$id, &$data, &$ttl, &$unpackItems, &$serializer, &$id_mutator) {
+      $r->setex(REDIS_SESSION_PREFIX . $id_mutator($id), $ttl, $serializer($data));
 
       // Unpack individual properties into their own keys, if we want
       //foreach ($unpackItems as $item) {
