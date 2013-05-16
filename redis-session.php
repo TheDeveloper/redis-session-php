@@ -8,11 +8,15 @@ function json_decode_array($d){
   return json_decode($d, true);
 }
 
+/**
+ * By default this is a no-op but can be replaced by a custom function if REDIS_SESSION_ID_MUTATOR constant is defined
+ * to the custom function name. This can be useful if you'd like to filter or change the session ID prior to it
+ * being saved in Redis.
+ * @param  string $id The session ID
+ * @return string     Unaltered session ID
+ */
 function redis_session_id_mutator($id){
-  $str = substr($id, 2);
-  $o = strrpos($str, '.');
-  $str = substr($str, 0, $o);
-  return $str;
+  return $id;
 }
 
 //class RedisSession implements SessionHandlerInterface{ // only PHP 5.4.0+
