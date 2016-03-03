@@ -5,7 +5,7 @@ Stores your $_SESSION in Redis, using encoding of your choice. Dependency: [pred
 Clone:
 
 ````
-git clone https://TheDeveloper@github.com/TheDeveloper/redis-session-php.git
+git clone --recursive https://TheDeveloper@github.com/TheDeveloper/redis-session-php.git
 ````
 Or include as a submodule:
 
